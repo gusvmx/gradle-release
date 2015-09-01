@@ -24,6 +24,7 @@ class AutomaticSemanticVersioningTests extends GitSpecification {
         project = ProjectBuilder.builder().withName("GitReleasePluginTest").withProjectDir(localGit.repository.workTree).build()
         project.apply plugin: ReleasePlugin
         project.createScmAdapter.execute()
+		project.ext.set('gradle.release.useAutomaticVersion', "true")
 
         helper = new PluginHelper(project: project, extension: project.extensions['release'] as ReleaseExtension)
     }
@@ -35,7 +36,6 @@ class AutomaticSemanticVersioningTests extends GitSpecification {
     def 'feature version should be incremented when no previous tags exist based on project version'() {
         given:
         project.version = '1.0.0-SNAPSHOT' 
-		project.setProperty('release.useAutomaticVersion',  "true")
 		gitAdd(localGit, 'modified.txt') { it << "version=$project.version" }
 		gitCommit(localGit, 'Merge branch \'feature-JIRA-1\' into \'master\'')
         when:
@@ -47,7 +47,6 @@ class AutomaticSemanticVersioningTests extends GitSpecification {
 	def 'patch version should be incremented when no previous tags exist based on project version'() {
 		given:
 		project.version = '1.0.0-SNAPSHOT'
-		project.setProperty('release.useAutomaticVersion',  "true")
 		gitAdd(localGit, 'modified.txt') { it << "version=$project.version" }
 		gitCommit(localGit, 'Merge branch \'patch-JIRA-1\' into \'master\'')
 		when:
@@ -59,7 +58,6 @@ class AutomaticSemanticVersioningTests extends GitSpecification {
 	def 'major version should be incremented when no previous tags exist based on project version'() {
 		given:
 		project.version = '1.0.0-SNAPSHOT'
-		project.setProperty('release.useAutomaticVersion',  "true")
 		gitAdd(localGit, 'modified.txt') { it << "version=$project.version" }
 		gitCommit(localGit, 'Merge branch \'major-JIRA-1\' into \'master\'')
 		when:
@@ -74,7 +72,6 @@ class AutomaticSemanticVersioningTests extends GitSpecification {
         localGit.tag().setName(helper.tagName()).call()
 		
 		project.version = '1.0.1'
-		project.setProperty('release.useAutomaticVersion',  "true")
 		gitAdd(localGit, 'modified.txt') { it << "version=$project.version" }
 		gitCommit(localGit, 'Merge branch \'feature-JIRA-1\' into \'master\'')
         when:
@@ -89,7 +86,6 @@ class AutomaticSemanticVersioningTests extends GitSpecification {
 		localGit.tag().setName(helper.tagName()).call()
 		
 		project.version = '1.0.1'
-		project.setProperty('release.useAutomaticVersion',  "true")
 		gitAdd(localGit, 'modified.txt') { it << "version=$project.version" }
 		gitCommit(localGit, 'Merge branch \'patch-JIRA-1\' into \'master\'')
 		when:
@@ -104,7 +100,6 @@ class AutomaticSemanticVersioningTests extends GitSpecification {
 		localGit.tag().setName(helper.tagName()).call()
 		
 		project.version = '1.0.1'
-		project.setProperty('release.useAutomaticVersion',  "true")
 		gitAdd(localGit, 'modified.txt') { it << "version=$project.version" }
 		gitCommit(localGit, 'Merge branch \'major-JIRA-1\' into \'master\'')
 		when:
@@ -119,7 +114,6 @@ class AutomaticSemanticVersioningTests extends GitSpecification {
 		localGit.tag().setName(helper.tagName()).call()
 		
 		project.version = '1.0.1'
-		project.setProperty('release.useAutomaticVersion',  "true")
 		gitAdd(localGit, 'modified.txt') { it << "version=$project.version" }
 		gitCommit(localGit, 'something different from a branch merge')
 		when:
