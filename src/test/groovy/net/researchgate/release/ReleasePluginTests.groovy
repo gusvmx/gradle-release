@@ -23,6 +23,8 @@ class ReleasePluginTests extends Specification {
     def setup() {
         project = ProjectBuilder.builder().withName('ReleasePluginTest').withProjectDir(testDir).build()
         def testVersionPropertyFile = project.file('version.properties')
+		testDir.mkdir()
+		testVersionPropertyFile.createNewFile()
         testVersionPropertyFile.withWriter { w ->
             w.writeLine 'version=1.2'
         }
