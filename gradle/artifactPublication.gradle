@@ -1,0 +1,30 @@
+apply plugin: 'maven-publish'
+
+task sourceJar(type: Jar) {
+	classifier "sources"
+	from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier "javadoc"
+	from javadoc.destinationDir
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifact sourceJar
+			artifact javadocJar
+		}
+	}
+	repositories {
+		maven {
+			if(project.version.endsWith('-SNAPSHOT')) {
+				url "http://10.100.144.58:8081/artifactory/plugins-snapshot-local"
+			} else {
+				url "http://10.100.144.58:8081/artifactory/plugins-release-local"
+			}
+		}
+	}
+}

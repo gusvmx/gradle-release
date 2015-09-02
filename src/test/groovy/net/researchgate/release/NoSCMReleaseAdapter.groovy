@@ -44,7 +44,7 @@ class NoSCMReleaseAdapter extends BaseScmAdapter {
     }
 
     @Override
-    void createReleaseTag(String message = "") {
+    void createReleaseTag(String message) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -60,6 +60,6 @@ class NoSCMReleaseAdapter extends BaseScmAdapter {
 	
 	@Override
 	String assignReleaseVersionAutomatically(String currentVersion) {
-		//
+		//Not implemented
 	}
 }
