@@ -135,8 +135,9 @@ class GitAdapter extends BaseScmAdapter {
 			newVersion = version.newMajor()
 		} else {
 			throw new GradleException("Could not assign release version automatically because " +  
-				"there is no information on last commit message to identify whether the change is major, feature or patch." +
-				"Last commit message should contain one of these keywords: major-, feature-, patch- in order to version automatically")
+				"there is no information on last commit subject to identify whether the change is major, feature or patch." +
+				"\nLast commit subject should contain one of these keywords: major-, feature-, patch- in order to version automatically" +
+				"\nLast commit subject: " + lastCommitMessage)
 		}
 		return newVersion.toString()
 	}
