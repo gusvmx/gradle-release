@@ -119,7 +119,7 @@ class GitAdapter extends BaseScmAdapter {
 	
 	@Override
 	String assignReleaseVersionAutomatically(String currentVersion) {
-		def lastCommitMessage = exec(['git', 'log', '-1', '--pretty=%B']).readLines()[0]
+		def lastCommitMessage = exec(['git', 'log', '-1', '--pretty=%s']).readLines()[0]
 		def latestTag = getLatestTag()
 		def version = new SemanticVersion(currentVersion)
 		if (latestTag != null) {
