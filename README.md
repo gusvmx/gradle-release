@@ -1,7 +1,7 @@
 # gradle-release plugin
 
 [![Build Status](https://travis-ci.org/researchgate/gradle-release.svg?branch=master)](https://travis-ci.org/researchgate/gradle-release)
-[![Download](https://api.bintray.com/packages/researchgate/gradle-plugins/gradle-release/images/download.svg)](https://bintray.com/researchgate/gradle-plugins/gradle-release/_latestVersion)
+[![Download](https://api.bintray.com/packages/researchgate/gradle-plugins/gradle-release/images/download.svg)](2.4.3)
 
 ## Introduction
 
@@ -30,10 +30,13 @@ The gradle-release plugin will work with Gradle 1.0M3 and beyond
 ```groovy
 buildscript {
     repositories {
-        jcenter()
+        maven{
+			name "bursatec-artifactory-plugins-releases"
+			url "http://10.100.144.58:8081/artifactory/repo"
+		}
     }
     dependencies {
-        classpath 'net.researchgate:gradle-release:2.2.1'
+        classpath 'net.researchgate:gradle-release:2.4.3'
     }
 }
 
@@ -44,7 +47,7 @@ apply plugin: 'net.researchgate.release'
 
 ```groovy
 plugins {
-  id 'net.researchgate.release' version '2.2.1'
+  id 'net.researchgate.release' version '2.4.3'
 }
 ```
 
@@ -224,11 +227,24 @@ This means the gradle-release plugin does not support sub projects that have dif
 
 In a continuous integration environment like Jenkins or Hudson, you don't want to have an interactive release process. To avoid having to enter any information manually during the process, you can tell the plugin to automatically set and update the version number.
 
-You can do this by setting the `release.useAutomaticVersion` property on the command line, or in Jenkins when you execute gradle. The version to release and the next version can be optionally defined using the properties `releaseVersion` and `newVersion`.
+You can do this by setting the `release.useAutomaticVersion` property on the command line, or in Jenkins when you execute gradle. 
+
+The version to release is given by the contents of the subject on the last commit in master and the last tag version (or current version should no tag exist). For instance, if you merge your branch into master, there are 3 basic prefixes for naming your branch: major-, feature-, and patch-. 
+
+Should you use 'major-' the first digit will be increased and the others to reset to 0. S
+
+hould you use 'feature-' the first digiti will remain untouched, the middle digit is increased by 1 and the last one is reset to 0. 
+
+Should you use 'patch-' the first two version remain the same and the last version is incresased by 1.
 
 ```bash
-$ gradle release -Prelease.useAutomaticVersion=true -PreleaseVersion=1.0.0 -PnewVersion=1.1.0-SNAPSHOT
+$ gradle release -Prelease.useAutomaticVersion=true
 ```
+
+For instance:
+if the last commit subject in master is something like "Merge branch 'patch-xxx' into 'master'" or contains "patch-" and your last tag is 1.1.1, your release version is going to be 1.1.2
+if the last commit subject in master is something like "Merge branch 'feature-xxx' into 'master'" and your last tag is 1.1.1, your release version is going to be 1.2.0
+if the last commit subject in master is something like "Merge branch 'major-xxx' into 'master'" and your last tag is 1.1.1, your release version is going to be 2.0.0
 
 
 ## Getting Help
