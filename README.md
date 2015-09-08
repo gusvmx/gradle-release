@@ -1,7 +1,7 @@
 # gradle-release plugin
 
 [![Build Status](https://travis-ci.org/researchgate/gradle-release.svg?branch=master)](https://travis-ci.org/researchgate/gradle-release)
-[![Download](https://api.bintray.com/packages/researchgate/gradle-plugins/gradle-release/images/download.svg)](2.4.3)
+[![Download]](2.4.3)
 
 ## Introduction
 
@@ -231,20 +231,18 @@ You can do this by setting the `release.useAutomaticVersion` property on the com
 
 The version to release is given by the contents of the subject on the last commit in master and the last tag version (or current version should no tag exist). For instance, if you merge your branch into master, there are 3 basic prefixes for naming your branch: major-, feature-, and patch-. 
 
-Should you use 'major-' the first digit will be increased and the others to reset to 0. S
-
-hould you use 'feature-' the first digiti will remain untouched, the middle digit is increased by 1 and the last one is reset to 0. 
-
-Should you use 'patch-' the first two version remain the same and the last version is incresased by 1.
+* Should you use 'major-' the first digit will be increased and the others to reset to 0. S
+* Should you use 'feature-' the first digiti will remain untouched, the middle digit is increased by 1 and the last one is reset to 0. 
+* Should you use 'patch-' the first two version remain the same and the last version is incresased by 1.
 
 ```bash
 $ gradle release -Prelease.useAutomaticVersion=true
 ```
 
 For instance:
-if the last commit subject in master is something like "Merge branch 'patch-xxx' into 'master'" or contains "patch-" and your last tag is 1.1.1, your release version is going to be 1.1.2
-if the last commit subject in master is something like "Merge branch 'feature-xxx' into 'master'" and your last tag is 1.1.1, your release version is going to be 1.2.0
-if the last commit subject in master is something like "Merge branch 'major-xxx' into 'master'" and your last tag is 1.1.1, your release version is going to be 2.0.0
+* if the last commit subject in master is something like "Merge branch 'patch-xxx' into 'master'" or contains "patch-" and your last tag is 1.1.1, your release version is going to be 1.1.2
+* if the last commit subject in master is something like "Merge branch 'feature-xxx' into 'master'" and your last tag is 1.1.1, your release version is going to be 1.2.0
+* if the last commit subject in master is something like "Merge branch 'major-xxx' into 'master'" and your last tag is 1.1.1, your release version is going to be 2.0.0
 
 
 ## Getting Help
