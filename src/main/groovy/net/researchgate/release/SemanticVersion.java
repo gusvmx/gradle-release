@@ -29,7 +29,7 @@ public class SemanticVersion {
 		String[] semanticVersion = releaseVersion.split("\\.");
 		if (semanticVersion.length != 3) {
 			throw new IllegalArgumentException(
-					"Semantic version should have 3 digits and be in the format x.x.x");
+					"Semantic version should have 3 digits and be in the format 'x.x.x'. Current version: " + version);
 		}
 		this.major = Integer.parseInt(semanticVersion[0]);
 		this.minor = Integer.parseInt(semanticVersion[1]);
