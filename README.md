@@ -1,7 +1,5 @@
 # gradle-release plugin
-
-[![Build Status](https://travis-ci.org/researchgate/gradle-release.svg?branch=master)](https://travis-ci.org/researchgate/gradle-release)
-[![Download]](2.4.3)
+## 2.4.3
 
 ## Introduction
 
