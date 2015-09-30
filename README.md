@@ -227,10 +227,10 @@ In a continuous integration environment like Jenkins or Hudson, you don't want t
 
 You can do this by setting the `release.useAutomaticVersion` property on the command line, or in Jenkins when you execute gradle. 
 
-The version to release is given by the contents of the subject on the last commit in master and the last tag version (or current version should no tag exist). For instance, if you merge your branch into master, there are 3 basic prefixes for naming your branch: major-, feature-, and patch-. 
+The version to release is given by the contents of the subject on the last commit in master and the last tag version (or current version should no tag exists). For instance, if you merge your branch into master, there are 3 basic prefixes for naming your branch: major-, feature-, and patch-. 
 
-* Should you use 'major-' the first digit will be increased and the others to reset to 0. S
-* Should you use 'feature-' the first digiti will remain untouched, the middle digit is increased by 1 and the last one is reset to 0. 
+* Should you use 'major-' the first digit will be increased and the others to reset to 0.
+* Should you use 'feature-' the first digit will remain untouched, the middle digit is increased by 1 and the last one is reset to 0. 
 * Should you use 'patch-' the first two version remain the same and the last version is incresased by 1.
 
 ```bash
