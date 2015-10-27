@@ -1,5 +1,5 @@
 # gradle-release plugin
-## 2.4.3
+## 2.4.4
 
 ## Introduction
 
@@ -34,7 +34,7 @@ buildscript {
 		}
     }
     dependencies {
-        classpath 'net.researchgate:gradle-release:2.4.3'
+        classpath 'net.researchgate.bmv:gradle-release:2.4.4'
     }
 }
 

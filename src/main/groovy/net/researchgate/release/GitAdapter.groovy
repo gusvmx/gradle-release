@@ -60,7 +60,6 @@ class GitAdapter extends BaseScmAdapter {
 
     @Override
     void checkCommitNeeded() {
-
         def status = gitStatus()
 
         if (status[UNVERSIONED]) {
@@ -100,7 +99,7 @@ class GitAdapter extends BaseScmAdapter {
 
     @Override
     void commit(String message) {
-        exec(['git', 'commit', '-a', '-m', message])
+        exec(['git', 'commit', '-a', '-m', message], errorPatterns: ['error: ', 'fatal: '])
         if (shouldPush()) {
             def branch
             if (extension.git.pushToCurrentBranch) {
@@ -192,7 +191,7 @@ class GitAdapter extends BaseScmAdapter {
     }
 
     private Map<String, Integer> gitRemoteStatus() {
-        def branchStatus = exec(['git', 'status', '-sb']).readLines()[0]
+        def branchStatus = exec(['git', 'status', '--porcelain', '-b']).readLines()[0]
         def aheadMatcher = branchStatus =~ /.*ahead (\d+).*/
         def behindMatcher = branchStatus =~ /.*behind (\d+).*/
 
