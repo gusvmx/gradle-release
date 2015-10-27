@@ -127,19 +127,31 @@ class GitAdapter extends BaseScmAdapter {
 		}
 		
 		def newVersion = null
-		if (lastCommitMessage.contains('feature-')) {
+		if (containsMinorIdentifier(lastCommitMessage)) {
 			newVersion = version.newFeature()
-		} else if (lastCommitMessage.contains('patch-')) {
+		} else if (containsPatchIdentifier(lastCommitMessage)) {
 			newVersion = version.newPatch()
-		} else if (lastCommitMessage.contains('major-')) {
+		} else if (containsMajorIdentifier(lastCommitMessage)) {
 			newVersion = version.newMajor()
 		} else {
 			throw new GradleException("Could not assign release version automatically because " +  
 				"there is no information on last commit subject to identify whether the change is major, feature or patch." +
-				"\nLast commit subject should contain one of these keywords: major-, feature-, patch- in order to version automatically" +
+				"\nLast commit subject should contain one of these keywords: major-, feature-, minor-, patch-, hotfix-, or fix- in order to version automatically" +
 				"\nLast commit subject: " + lastCommitMessage)
 		}
 		return newVersion.toString()
+	}
+	
+	private boolean containsMinorIdentifier(String lastCommitSubject) {
+		return lastCommitSubject.contains('feature-') || lastCommitSubject.contains('minor-')
+	}
+	
+	private boolean containsPatchIdentifier(String lastCommitSubject) {
+		return lastCommitSubject.contains('patch-') || lastCommitSubject.contains('fix-') || lastCommitSubject.contains('hotfix-')
+	}
+	
+	private boolean containsMajorIdentifier(String lastCommitSubject) {
+		return lastCommitSubject.contains('major-')
 	}
 	
 	private String getLatestTag() {
