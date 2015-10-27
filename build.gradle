@@ -18,7 +18,7 @@ plugins {
 	id 'maven-publish'
 }
 
-group='net.researchgate'
+group='net.researchgate.bmv'
 apply from: "${rootDir}/gradle/artifactPublication.gradle"
 apply plugin: 'net.researchgate.release'
 
