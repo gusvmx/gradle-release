@@ -146,8 +146,7 @@ class GitAdapter extends BaseScmAdapter {
 	}
 	
 	private boolean containsPatchIdentifier(String lastCommitSubject) {
-		return lastCommitSubject.contains('patch-') || lastCommitSubject.contains('fix-') 
-			|| lastCommitSubject.contains('hotfix-') || lastCommitSubject.contains('doc-')
+		return lastCommitSubject.contains('patch-') || lastCommitSubject.contains('fix-') || lastCommitSubject.contains('hotfix-') || lastCommitSubject.contains('doc-')
 	}
 	
 	private boolean containsMajorIdentifier(String lastCommitSubject) {
