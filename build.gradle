@@ -16,6 +16,7 @@ plugins {
 	id 'eclipse'
 	id 'nu.studer.plugindev' version '1.0.3'
 	id 'maven-publish'
+	id 'maven'
 }
 
 group='net.researchgate.bmv'
