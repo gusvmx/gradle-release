@@ -19,7 +19,7 @@ plugins {
 	id 'maven'
 }
 
-group='net.researchgate.gnp'
+group='mx.com.gnp.plugin'
 apply from: "${rootDir}/gradle/artifactPublication.gradle"
 apply plugin: 'net.researchgate.release'
 
@@ -33,13 +33,16 @@ dependencies {
 
 plugindev {
     pluginImplementationClass 'net.researchgate.release.ReleasePlugin'
-    pluginDescription 'gradle-release is a plugin for providing a Maven-like release process to project using Gradle.'
+    pluginDescription 'gradle-release es un plugin para poder versionar semánticamente un proyecto utilizando Gradle. Permite también tener un versionamiento automatizado cuando se utiliza Git de acuerdo a un conjunto de palabras reservadas (como feature-, hotfix-) en el asunto del último commit en master.'
     pluginLicenses 'MIT'
     pluginTags 'gradle', 'plugin', 'release'
     authorId 'danez'
     authorName 'Daniel Tschinder'
     authorEmail 'daniel.tschinder@researchgate.net'
-    projectUrl 'https://github.com/researchgate/gradle-release'
+    authorId 'gvtena'
+    authorName 'Gustavo Vargas'
+    authorEmail 'gustavo.vargas@gnp.com.mx'
+    projectUrl 'http://10.67.4.72/softwareengineering/gradle-release'
     projectInceptionYear '2011'
     done() // do not omit this
 }
