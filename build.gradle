@@ -43,6 +43,8 @@ plugindev {
     authorName 'Gustavo Vargas'
     authorEmail 'gustavo.vargas@gnp.com.mx'
     projectUrl 'http://10.67.4.72/softwareengineering/gradle-release'
+    projectIssuesUrl 'http://10.67.4.72/softwareengineering/gradle-release/issues'
+    projectVcsUrl 'http://10.67.4.72/softwareengineering/gradle-release.git'	
     projectInceptionYear '2011'
     done() // do not omit this
 }
