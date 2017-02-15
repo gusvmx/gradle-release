@@ -20,10 +20,14 @@ publishing {
 	}
 	repositories {
 		maven {
+			credentials {
+            		    username "$artifactoryUser"
+               		    password "$artifactoryPassword"
+	            }
 			if(project.version.endsWith('-SNAPSHOT')) {
-				url "http://10.100.144.58:8081/artifactory/plugins-snapshot-local"
+				url "$snapshotsRepo"
 			} else {
-				url "http://10.100.144.58:8081/artifactory/plugins-release-local"
+				url "$releasesRepo"
 			}
 		}
 	}
