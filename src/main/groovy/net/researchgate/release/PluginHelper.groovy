@@ -29,6 +29,8 @@ class PluginHelper {
 
     protected Executor executor
 
+    protected Map<String, Object> attributes = [:]
+
     /**
      * Retrieves SLF4J {@link Logger} instance.
      *
@@ -40,8 +42,7 @@ class PluginHelper {
     Logger getLog() { project?.logger ?: LoggerFactory.getLogger(this.class) }
 
     boolean useAutomaticVersion() {
-        project.hasProperty('release.useAutomaticVersion') && project.getProperty('release.useAutomaticVersion') == "true" ||
-            project.hasProperty('gradle.release.useAutomaticVersion') && project.getProperty('gradle.release.useAutomaticVersion') == "true"
+        findProperty('release.useAutomaticVersion', null, 'gradle.release.useAutomaticVersion') == 'true'
     }
 
     /**
@@ -70,14 +71,19 @@ class PluginHelper {
         File propertiesFile = project.file(extension.versionPropertyFile)
         if (!propertiesFile.file) {
             if (!isVersionDefined()) {
-                project.version = useAutomaticVersion() ? '1.0' : readLine('Version property not set, please set it now:', '1.0')
+                project.version = getReleaseVersion('1.0.0')
             }
-            boolean createIt = project.hasProperty('version') && promptYesOrNo("[$propertiesFile.canonicalPath] not found, create it with version = ${project.version}")
-            if (createIt) {
+
+            if (!useAutomaticVersion() && promptYesOrNo('Do you want to use SNAPSHOT versions inbetween releases')) {
+                attributes.usesSnapshot = true
+            }
+
+            if (useAutomaticVersion() || promptYesOrNo("[$propertiesFile.canonicalPath] not found, create it with version = ${project.version}")) {
                 writeVersion(propertiesFile, 'version', project.version)
+                attributes.propertiesFileCreated = true
             } else {
                 log.debug "[$propertiesFile.canonicalPath] was not found, and user opted out of it being created. Throwing exception."
-                throw new GradleException("[$propertiesFile.canonicalPath] not found and you opted out of it being created,\n please create it manually and and specify the version property.")
+                throw new GradleException("[$propertiesFile.canonicalPath] not found and you opted out of it being created,\n please create it manually and specify the version property.")
             }
         }
         propertiesFile
@@ -85,10 +91,14 @@ class PluginHelper {
 
     protected void writeVersion(File file, String key, version) {
         try {
-            // we use replace here as other ant tasks escape and modify the whole file
-            project.ant.replaceregexp(file: file, byline: true) {
-                regexp(pattern: "$key(\\s*)=(\\s*).+")
-                substitution(expression: "$key\\1=\\2$version")
+            if (!file.file) {
+                project.ant.echo(file: file, message: "$key=$version")
+            } else {
+                // we use replace here as other ant tasks escape and modify the whole file
+                project.ant.replaceregexp(file: file, byline: true) {
+                    regexp(pattern: "^(\\s*)$key((\\s*[=|:]\\s*)|(\\s+)).+\$")
+                    substitution(expression: "\\1$key\\2$version")
+                }
             }
         } catch (BuildException be) {
             throw new GradleException('Unable to write version property.', be)
@@ -96,7 +106,7 @@ class PluginHelper {
     }
 
     boolean isVersionDefined() {
-        project.version && 'unspecified' != project.version
+        project.version && Project.DEFAULT_VERSION != project.version
     }
 
     void warnOrThrow(boolean doThrow, String message) {
@@ -113,22 +123,40 @@ class PluginHelper {
             def engine = new SimpleTemplateEngine()
             def binding = [
                 "version": project.version,
-                "name"   : project.rootProject.name
+                "name"   : project.name
             ]
             tagName = engine.createTemplate(extension.tagTemplate).make(binding).toString()
         } else {
             // Backward compatible remove in version 3.0
-            String prefix = extension.tagPrefix ? "${extension.tagPrefix}-" : (extension.includeProjectNameInTag ? "${project.rootProject.name}-" : "")
+            String prefix = extension.tagPrefix ? "${extension.tagPrefix}-" : (extension.includeProjectNameInTag ? "${project.name}-" : "")
             tagName = "${prefix}${project.version}"
         }
 
         tagName
     }
 
-    String findProperty(String key, String defaultVal = "") {
-        System.getProperty(key) ?: project.hasProperty(key) ? project.property(key) : defaultVal
+    String findProperty(String key, Object defaultVal = null, String deprecatedKey = null) {
+        def property = System.getProperty(key) ?: project.hasProperty(key) ? project.property(key) : null
+
+        if (!property && deprecatedKey) {
+            property = System.getProperty(deprecatedKey) ?: project.hasProperty(deprecatedKey) ? project.property(deprecatedKey) : null
+            if (property) {
+                log.warn("You are using the deprecated parameter '${deprecatedKey}'. Please use the new parameter '$key'. The deprecated parameter will be removed in 3.0")
+            }
+        }
+
+        property ?: defaultVal
     }
 
+    String getReleaseVersion(String candidateVersion = "${project.version}") {
+        String releaseVersion = findProperty('release.releaseVersion', null, 'releaseVersion')
+
+        if (useAutomaticVersion()) {
+            return releaseVersion ?: candidateVersion
+        }
+
+        return readLine("This release version:", releaseVersion ?: candidateVersion)
+    }
 
     /**
      * Updates properties file (<code>gradle.properties</code> by default) with new version specified.
@@ -137,29 +165,14 @@ class PluginHelper {
      * @param newVersion new version to store in the file
      */
     void updateVersionProperty(String newVersion) {
-        def oldVersion = "${project.version}"
+        String oldVersion = project.version as String
         if (oldVersion != newVersion) {
             project.version = newVersion
-            project.ext.set('versionModified', true)
-            project.subprojects?.each { Project subProject ->
-                subProject.version = newVersion
-            }
-            def versionProperties = extension.versionProperties + 'version'
-            def propFile = findPropertiesFile()
-            versionProperties.each { String prop ->
-                writeVersion(propFile, prop, project.version)
-            }
+            attributes.versionModified = true
+            project.subprojects?.each { it.version = newVersion }
+            List<String> versionProperties = extension.versionProperties + 'version'
+            versionProperties.each { writeVersion(findPropertiesFile(), it, project.version) }
         }
-    }
-
-    /**
-     * Capitalizes first letter of the String specified.
-     *
-     * @param s String to capitalize
-     * @return String specified with first letter capitalized
-     */
-    protected static String capitalize(String s) {
-        s[0].toUpperCase() + (s.size() > 1 ? s[1..-1] : '')
     }
 
     /**
@@ -176,15 +189,16 @@ class PluginHelper {
         }
         println "$_message (WAITING FOR INPUT BELOW)"
 
-        return System.in.newReader().readLine() ?: defaultValue
+        System.in.newReader().readLine() ?: defaultValue
     }
 
     private static boolean promptYesOrNo(String message, boolean defaultValue = false) {
-        def defaultStr = defaultValue ? 'Y' : 'n'
+        String defaultStr = defaultValue ? 'Y' : 'n'
         String consoleVal = readLine("${message} (Y|n)", defaultStr)
         if (consoleVal) {
             return consoleVal.toLowerCase().startsWith('y')
         }
+
         defaultValue
     }
 }

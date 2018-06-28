@@ -61,7 +61,7 @@ These two scenarios should make it easy to get the same result as before:
 * ``includeProjectNameInTag`` not set or set to false
 * ``tagPrefix`` set to "something"
 
-Remove ``includeProjectNameInTag`` or ``tagPrefix`` and add 
+Remove ``includeProjectNameInTag`` or ``tagPrefix`` and add
 ```
 release {
     tagTemplate = 'something-$version'
@@ -72,7 +72,7 @@ release {
 
 * ``includeProjectNameInTag`` set to true
 
-Remove ``includeProjectNameInTag`` or ``tagPrefix`` and add 
+Remove ``includeProjectNameInTag`` or ``tagPrefix`` and add
 
 ```
 release {

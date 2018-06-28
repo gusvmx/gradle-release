@@ -17,8 +17,8 @@ class HgAdapter extends BaseScmAdapter {
 
     private static final String ERROR = 'abort:'
 
-    HgAdapter(Project project) {
-        super(project)
+    HgAdapter(Project project, Map<String, Object> attributes) {
+        super(project, attributes)
     }
 
     @Override
@@ -91,6 +91,12 @@ class HgAdapter extends BaseScmAdapter {
         exec(['hg', 'push'], errorMessage: 'Error committing new version', errorPatterns: [ERROR])
     }
 
+    @Override
+    void add(File file) {
+        exec(['hg', 'add', file.path], errorMessage: "Error adding file ${file.name}", errorPatterns: [ERROR])
+    }
+
+    @Override
     void revert() {
         exec(['hg', 'revert', findPropertiesFile().name], errorMessage: 'Error reverting changes made by the release plugin.', errorPatterns: [ERROR])
     }

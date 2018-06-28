@@ -12,15 +12,19 @@ package net.researchgate.release
 
 import org.gradle.api.Project
 
-class NoSCMReleaseAdapter extends BaseScmAdapter {
+class TestAdapter extends BaseScmAdapter {
 
-    NoSCMReleaseAdapter(Project project) {
-        super(project)
+    TestAdapter(Project project, Map<String, Object> attributes) {
+        super(project, attributes)
+    }
+
+    class TestConfig {
+        String testOption = ''
     }
 
     @Override
     Object createNewConfig() {
-        return null
+        new TestConfig()
     }
 
     @Override
@@ -30,41 +34,34 @@ class NoSCMReleaseAdapter extends BaseScmAdapter {
 
     @Override
     void init() {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     void checkCommitNeeded() {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     void checkUpdateNeeded() {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     void createReleaseTag(String message) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     void commit(String message) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    void revert() {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-	
-    @Override
-    String assignReleaseVersionAutomatically(String currentVersion) {
-        //Not implemented
     }
 
     @Override
     void add(File file) {
-        //Not implemented
     }
+
+    @Override
+    void revert() {
+    }
+
+    @Override
+    String assignReleaseVersionAutomatically(String currentVersion) {
+    }
+
 }

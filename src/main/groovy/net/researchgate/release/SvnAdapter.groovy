@@ -19,7 +19,7 @@ class SvnAdapter extends BaseScmAdapter {
 
     private static final String ERROR = 'Commit failed'
 
-    private static final def urlPattern = ~/URL:\s(.*?)(\/(trunk|branches|tags).*?)$/
+    private static final def urlPattern = ~/URL:\s(.*?)(\/(?i)(trunk|branches|tags).*?)$/
 
     private static final def revPattern = ~/Revision:\s(.*?)$/
 
@@ -27,13 +27,14 @@ class SvnAdapter extends BaseScmAdapter {
 
     private static final def environment = [LANG: 'C', LC_MESSAGES: 'C', LC_ALL: ''];
 
-    SvnAdapter(Project project) {
-        super(project)
+    SvnAdapter(Project project, Map<String, Object> attributes) {
+        super(project, attributes)
     }
 
     class SvnConfig {
         String username
         String password
+        boolean pinExternals = false
     }
 
     @Override
@@ -62,7 +63,7 @@ class SvnAdapter extends BaseScmAdapter {
         }
 
         findSvnUrl()
-        project.ext.set('releaseSvnRev', null)
+        attributes.svnRev = null
     }
 
     @Override
@@ -97,10 +98,7 @@ class SvnAdapter extends BaseScmAdapter {
 
     @Override
     void checkUpdateNeeded() {
-        def props = project.properties
-        String svnUrl = props.releaseSvnUrl
-        String svnRev = props.initialSvnRev
-        String svnRemoteRev = ''
+        String svnRev = attributes.initialSvnRev
 
         String out = svnExec(['status', '-q', '-u'])
         int missing = 0
@@ -118,29 +116,31 @@ class SvnAdapter extends BaseScmAdapter {
             warnOrThrow(extension.failOnUpdateNeeded, "You are missing ${missing} changes.")
         }
 
-        out = svnExec(['info', svnUrl])
+        out = svnExec(['info', attributes.svnUrl as String])
         out.eachLine { line ->
             Matcher matcher = line =~ revPattern
             if (matcher.matches()) {
-                svnRemoteRev = matcher.group(1)
-                project.ext.set('releaseRemoteSvnRev', svnRemoteRev)
+                attributes.remoteSvnRev = matcher.group(1)
             }
         }
-        if (svnRev != svnRemoteRev) {
+        if (svnRev != attributes.remoteSvnRev) {
             // warn that there's a difference in local revision versus remote
-            warnOrThrow(extension.failOnUpdateNeeded, "Local revision (${svnRev}) does not match remote (${svnRemoteRev}), local revision is used in tag creation.")
+            warnOrThrow(extension.failOnUpdateNeeded, "Local revision (${svnRev}) does not match remote (${attributes.remoteSvnRev}), local revision is used in tag creation.")
         }
     }
 
     @Override
     void createReleaseTag(String message) {
-        def props = project.properties
-        String svnUrl = props.releaseSvnUrl
-        String svnRev = props.releaseSvnRev ?: props.initialSvnRev //release set by commit below when needed, no commit => initial
-        String svnRoot = props.releaseSvnRoot
+        String svnUrl = attributes.svnUrl
+        String svnRev = attributes.svnRev ?: attributes.initialSvnRev //release set by commit below when needed, no commit => initial
+        String svnRoot = attributes.svnRoot
         String svnTag = tagName()
 
-        svnExec(['copy', "${svnUrl}@${svnRev}", "${svnRoot}/tags/${svnTag}", '--parents', '-m', message])
+        List<String> commands = ['copy', "${svnUrl}@${svnRev}", "${svnRoot}/tags/${svnTag}", '--parents', '-m', message]
+        if (extension.svn.pinExternals) {
+            commands += '--pin-externals'
+        }
+        svnExec(commands)
     }
 
     @Override
@@ -148,15 +148,19 @@ class SvnAdapter extends BaseScmAdapter {
         String out = svnExec(['commit', '-m', message], errorMessage: 'Error committing new version', errorPatterns: [ERROR])
 
         // After the first commit we need to find the new revision so the tag is made from the correct revision
-        if (project.properties.releaseSvnRev == null) {
+        if (!attributes.svnRev) {
             out.eachLine { line ->
                 Matcher matcher = line =~ commitPattern
                 if (matcher.matches()) {
-                    String revision = matcher.group(1)
-                    project.ext.set('releaseSvnRev', revision)
+                    attributes.svnRev = matcher.group(1)
                 }
             }
         }
+    }
+
+    @Override
+    void add(File file) {
+        svnExec(['add', file.path], errorMessage: "Error adding file ${file.name}", errorPatterns: ['warning:'])
     }
 
     @Override
@@ -196,16 +200,15 @@ class SvnAdapter extends BaseScmAdapter {
             if (matcher.matches()) {
                 String svnRoot = matcher.group(1)
                 String svnProject = matcher.group(2)
-                project.ext.set('releaseSvnRoot', svnRoot)
-                project.ext.set('releaseSvnUrl', "$svnRoot$svnProject")
+                attributes.svnRoot = svnRoot
+                attributes.svnUrl = "$svnRoot$svnProject"
             }
             matcher = line =~ revPattern
             if (matcher.matches()) {
-                String revision = matcher.group(1)
-                project.ext.set('initialSvnRev', revision)
+                attributes.initialSvnRev = matcher.group(1)
             }
         }
-        if (!project.hasProperty('releaseSvnUrl') || !project.hasProperty('initialSvnRev')) {
+        if (!attributes.svnUrl || !attributes.initialSvnRev) {
             throw new GradleException('Could not determine root SVN url or revision.')
         }
     }

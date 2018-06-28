@@ -14,8 +14,9 @@ import org.gradle.api.Project
 
 abstract class BaseScmAdapter extends PluginHelper {
 
-    BaseScmAdapter(Project project) {
+    BaseScmAdapter(Project project, Map<String, Object> attributes) {
         this.project = project
+        this.attributes = attributes
         extension = project.extensions['release'] as ReleaseExtension
     }
 
@@ -31,9 +32,11 @@ abstract class BaseScmAdapter extends PluginHelper {
 
     abstract void createReleaseTag(String message)
 
+    abstract void add(File file)
+
     abstract void commit(String message)
 
     abstract void revert()
 	
-	abstract String assignReleaseVersionAutomatically(String currentVersion)
+    abstract String assignReleaseVersionAutomatically(String currentVersion)
 }

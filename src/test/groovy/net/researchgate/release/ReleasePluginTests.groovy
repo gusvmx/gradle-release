@@ -18,9 +18,12 @@ class ReleasePluginTests extends Specification {
 
     Project project
 
-    def testDir = new File("build/tmp/test/${getClass().simpleName}")
+    File testDir = new File("build/tmp/test/${getClass().simpleName}")
 
     def setup() {
+        if (!testDir.exists()) {
+            testDir.mkdirs()
+        }
         project = ProjectBuilder.builder().withName('ReleasePluginTest').withProjectDir(testDir).build()
         def testVersionPropertyFile = project.file('version.properties')
 		testDir.mkdir()
@@ -29,7 +32,7 @@ class ReleasePluginTests extends Specification {
             w.writeLine 'version=1.2'
         }
         project.apply plugin: ReleasePlugin
-        project.release.scmAdapters = [NoSCMReleaseAdapter]
+        project.release.scmAdapters = [TestAdapter]
 
         project.createScmAdapter.execute()
     }
@@ -45,9 +48,18 @@ class ReleasePluginTests extends Specification {
         project.release {
             versionPropertyFile = 'version.properties'
         }
-        project.initScmAdapter.execute()
+        project.unSnapshotVersion.execute()
         expect:
         project.version == '1.2'
 
+    }
+
+    def 'subproject tasks are named with qualified paths'() {
+        given:
+        Project sub = ProjectBuilder.builder().withName('sub').withParent(project).withProjectDir(testDir).build()
+        sub.apply plugin: ReleasePlugin
+
+        expect:
+        sub.tasks.release.tasks.every { it.startsWith(':sub:') }
     }
 }

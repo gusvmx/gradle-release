@@ -3,9 +3,10 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'nu.studer:gradle-plugindev-plugin:1.0.3'
-        classpath 'org.codehaus.groovy:groovy-backports-compat23:2.4.3'
-        classpath 'net.researchgate:gradle-release:2.1.2'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.3.0'
+        classpath 'nu.studer:gradle-plugindev-plugin:1.0.4'
+        classpath 'org.codehaus.groovy:groovy-backports-compat23:2.4.6'
+        classpath 'net.researchgate:gradle-release:2.6.0'
     }
 }
 
@@ -29,6 +30,7 @@ dependencies {
     testCompile("org.spockframework:spock-core:$spockVersion") { exclude group: 'org.codehaus.groovy' }
     testCompile "junit:junit:$junitVersion"
     testCompile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
+    testCompile "cglib:cglib-nodep:$cglibVersion"
 }
 
 plugindev {
@@ -49,4 +51,10 @@ plugindev {
     done() // do not omit this
 }
 
-wrapper.gradleVersion = '2.3'
+release {
+    git {
+        requireBranch = '(master|\\d+\\.\\d+)'
+    }
+}
+
+wrapper.gradleVersion = '1.12'

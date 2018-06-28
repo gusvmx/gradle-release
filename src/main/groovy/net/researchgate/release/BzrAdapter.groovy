@@ -18,8 +18,8 @@ class BzrAdapter extends BaseScmAdapter {
     private static final String ERROR = 'ERROR'
     private static final String DELIM = '\n  * '
 
-    BzrAdapter(Project project) {
-        super(project)
+    BzrAdapter(Project project, Map<String, Object> attributes) {
+        super(project, attributes)
     }
 
     @Override
@@ -55,7 +55,7 @@ class BzrAdapter extends BaseScmAdapter {
         def unknown = xml.unknown?.size() ?: 0
 
         def c = { String name ->
-            ["${ capitalize(name)}:",
+            ["${name.capitalize()}:",
                     xml."$name".file.collect { it.text().trim() },
                     xml."$name".directory.collect { it.text().trim() }].
                     flatten().
@@ -118,6 +118,11 @@ class BzrAdapter extends BaseScmAdapter {
     void commit(String message) {
         exec(['bzr', 'ci', '-m', message], errorMessage: 'Error committing new version', errorPatterns: [ERROR])
         exec(['bzr', 'push', ':parent'], errorMessage: 'Error committing new version', errorPatterns: [ERROR])
+    }
+
+    @Override
+    void add(File file) {
+        exec(['bzr', 'add', file.path], errorMessage: "Error adding file ${file.name}", errorPatterns: [ERROR])
     }
 
     @Override
